@@ -1,16 +1,37 @@
 require 'rubygems'
 require 'readline'
 require 'sequel'
+require 'terminal-table'
 
-DB = Sequel.oracle 'cink', :user => 'dhensgen', :password => '...'
+#DB = Sequel.oracle 'cink', :user => 'dhensgen', :password => '...'
+#puts DB.fetch('select count(1) from prod_sched').first
 
-puts DB.fetch('select count(1) from prod_sched').first
+DB = Sequel.sqlite 'test.sqlite3'
 
-#while line = Readline.readline('> ', true)
-#  DB.fetch(line).each do |row|
-#    puts row
-#  end
-#end
+def statement_type(statement)
+  case statement
+    when /\s*select/i then :select
+    when /\s*\\/i then :command
+    else nil
+  end
+end
+
+while line = Readline.readline('> ', true)
+  case statement_type(line)
+  when :select
+    begin
+      DB.fetch(line).each do |row|
+        puts row
+      end
+    rescue Sequel::DatabaseError => e
+      puts e
+    end
+  when :command
+    exit(0) if line =~ /\\q/
+  else
+    puts 'Unknown statement type'
+  end
+end
 
 __END__
 
