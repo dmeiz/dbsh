@@ -20,12 +20,16 @@ while line = Readline.readline('> ', true)
   case statement_type(line)
   when :select
     begin
-      DB.fetch(line).each do |row|
-        puts row
+      dataset = DB[line]
+      table = Terminal::Table.new(:headings => dataset.columns) do |t|
+        dataset.each do |row|
+          t.add_row(dataset.columns.map {|col| row[col]})
+        end
       end
     rescue Sequel::DatabaseError => e
       puts e
     end
+    puts table
   when :command
     exit(0) if line =~ /\\q/
   else
