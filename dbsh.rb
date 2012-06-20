@@ -1,12 +1,22 @@
 require 'rubygems'
 require 'readline'
 require 'sequel'
+require 'sqlite3'
 require 'terminal-table'
+require 'yaml'
 
 #DB = Sequel.oracle 'cink', :user => 'dhensgen', :password => '...'
 #puts DB.fetch('select count(1) from prod_sched').first
 
-DB = Sequel.sqlite 'test.sqlite3'
+config = YAML.load(File.read("#{ENV['HOME']}/.dbsh"))[ARGV[0]]
+DB = Sequel.connect(config)
+
+#Example ~/.dbsh:
+#dbsh_test:
+#  adapter: sqlite
+#  database: test.sqlite3
+# 
+## :adapter=>'postgres', :host=>'localhost', :database=>'blog', :user=>'user', :password=>'password'
 
 def statement_type(statement)
   case statement
@@ -43,7 +53,7 @@ OVERVIEW
 
   A clone of mysql cli with these enhancements:
 
-    * Connect to multiple database types
+X   * Connect to multiple database types
     * Named connections
     * Improved editor-execute loop
     * Implemented in Ruby
