@@ -21,6 +21,9 @@ DB = Sequel.connect(config)
 def statement_type(statement)
   case statement
     when /\s*select/i then :select
+    when /\s*insert/i then :insert
+    when /\s*update/i then :update
+    when /\s*delete/i then :delete
     when /\s*\\/i then :command
     else nil
   end
@@ -40,6 +43,13 @@ while line = Readline.readline('> ', true)
       puts e
     end
     puts table
+  when :insert
+    DB[line].insert
+    puts 'Inserted row'
+  when :update
+    puts "Updated #{DB[line].update} rows"
+  when :delete
+    puts "Deleted #{DB[line].delete} rows"
   when :command
     exit(0) if line =~ /\\q/
   else
@@ -66,36 +76,43 @@ X   * Connect to multiple database types
 
 MVP
 
+X  Connect to databases by name:
+X
+X    $ dbsh rockwell_dev
+X    ~/.dbsh:
+X      rockwell_dev:
+X        adapter: mysql
+X        username: root
+X        password:
+X        database: rockwell_dev
+
+X  Connect to different types of databases:
+X
+X    * mysql
+X    * oracle
+X    * sqlite
+X    * postgres
+
+X  Execute sql:
+X
+X    > select * from illustrations;
+X    id  name     updated_at
+X    --  -------  ----------
+X    10  Filmore  2012-06-12
+X
+X    > delete from illustrations;
+X    Deleted 1 row.
+
+X  Quit:
+X
+X    > \q
+X    $
+
   Install:
 
     $ gem install dbsh
 
-  Connect to databases by name:
-
-    $ dbsh rockwell_dev
-    ~/.dbsh:
-      rockwell_dev:
-        adapter: mysql
-        username: root
-        password:
-        database: rockwell_dev
-
-  Connect to different types of databases:
-
-    * mysql
-    * oracle
-    * sqlite
-    * postgres
-
-  Execute sql:
-
-    > select * from illustrations;
-    id  name     updated_at
-    --  -------  ----------
-    10  Filmore  2012-06-12
-
-    > delete from illustrations;
-    Deleted 1 row.
+  Report errors:
 
     > foo;
     ERROR: What is foo?
@@ -129,11 +146,6 @@ MVP
     id         integer
     name       varchar(256)
     updated_at datetime
-
-  Quit:
-
-    > \q
-    $
 
   Edit and run a sql script:
 
