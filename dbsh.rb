@@ -30,30 +30,30 @@ def statement_type(statement)
 end
 
 while line = Readline.readline('> ', true)
-  case statement_type(line)
-  when :select
-    begin
-      dataset = DB[line]
-      table = Terminal::Table.new(:headings => dataset.columns) do |t|
-        dataset.each do |row|
-          t.add_row(dataset.columns.map {|col| row[col]})
+  begin
+    case statement_type(line)
+    when :select
+        dataset = DB[line]
+        table = Terminal::Table.new(:headings => dataset.columns) do |t|
+          dataset.each do |row|
+            t.add_row(dataset.columns.map {|col| row[col]})
+          end
         end
-      end
-    rescue Sequel::DatabaseError => e
-      puts e
+      puts table
+    when :insert
+      DB[line].insert
+      puts 'Inserted row'
+    when :update
+      puts "Updated #{DB[line].update} rows"
+    when :delete
+      puts "Deleted #{DB[line].delete} rows"
+    when :command
+      exit(0) if line =~ /\\q/
+    else
+      puts 'Unknown statement type'
     end
-    puts table
-  when :insert
-    DB[line].insert
-    puts 'Inserted row'
-  when :update
-    puts "Updated #{DB[line].update} rows"
-  when :delete
-    puts "Deleted #{DB[line].delete} rows"
-  when :command
-    exit(0) if line =~ /\\q/
-  else
-    puts 'Unknown statement type'
+  rescue Sequel::DatabaseError => e
+    puts 'Error: ' + e.message
   end
 end
 
@@ -108,14 +108,14 @@ X
 X    > \q
 X    $
 
+X  Report errors:
+X
+X    > foo;
+X    ERROR: What is foo?
+
   Install:
 
     $ gem install dbsh
-
-  Report errors:
-
-    > foo;
-    ERROR: What is foo?
 
   Readline support:
 
