@@ -14,4 +14,7 @@ Gem::Specification.new do |gem|
   gem.name          = "dbsh"
   gem.require_paths = ["lib"]
   gem.version       = Dbsh::VERSION
+
+  gem.add_dependency('sequel', '>= 3.36.0')
+  gem.add_dependency('terminal-table', '>= 1.4.0')
 end

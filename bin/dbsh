@@ -1,9 +1,7 @@
 #! /usr/bin/env ruby
 
-require 'rubygems'
 require 'readline'
 require 'sequel'
-require 'sqlite3'
 require 'terminal-table'
 require 'yaml'
 
