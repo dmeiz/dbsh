@@ -35,33 +35,40 @@ def statement_type(statement)
   end
 end
 
+def process_statement(statement_type, statement)
+  case statement_type
+  when :select
+    dataset = DB[statement]
+    table = Terminal::Table.new(:headings => dataset.columns) do |t|
+      dataset.each do |row|
+        t.add_row(dataset.columns.map {|col| row[col]})
+      end
+    end
+    puts table
+  when :insert
+    DB[statement].insert
+    puts 'Inserted row'
+  when :update
+    puts "Updated #{DB[statement].update} rows"
+  when :delete
+    puts "Deleted #{DB[statement].delete} rows"
+  else
+    puts 'Unknown statement type'
+  end
+end
+
 File.open("#{ENV['HOME']}/.dbsh_history", 'a') do |history|
   while line = Readline.readline('> ', true)
     history.write(line + "\n"); history.flush
     begin
-      case statement_type(line)
-      when :select
-          dataset = DB[line]
-          table = Terminal::Table.new(:headings => dataset.columns) do |t|
-            dataset.each do |row|
-              t.add_row(dataset.columns.map {|col| row[col]})
-            end
-          end
-        puts table
-      when :insert
-        DB[line].insert
-        puts 'Inserted row'
-      when :update
-        puts "Updated #{DB[line].update} rows"
-      when :delete
-        puts "Deleted #{DB[line].delete} rows"
-      when :command
+      statement_type = statement_type(line)
+      if statement_type == :command
         case line
           when /\\q/ then exit(0)
           else puts 'Unknown command'
         end
       else
-        puts 'Unknown statement type'
+        process_statement(statement_type, line)
       end
     rescue Sequel::DatabaseError => e
       puts 'Error: ' + e.message
