@@ -56,7 +56,10 @@ File.open("#{ENV['HOME']}/.dbsh_history", 'a') do |history|
       when :delete
         puts "Deleted #{DB[line].delete} rows"
       when :command
-        exit(0) if line =~ /\\q/
+        case line
+          when /\\q/ then exit(0)
+          else puts 'Unknown command'
+        end
       else
         puts 'Unknown statement type'
       end
@@ -126,9 +129,9 @@ X  Install:
 X
 X    $ gem install dbsh
 
-  Readline support:
-
-    * History
+X  Readline support:
+X
+X    * History
 X    * Edit line
 
   Execute a sql script:
