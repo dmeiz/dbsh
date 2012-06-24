@@ -13,7 +13,7 @@ DB = Sequel.connect(config)
 
 File.open("#{ENV['HOME']}/.dbsh_history", 'r') do |f|
   f.each_line do |line|
-    Readline::HISTORY << line
+    Readline::HISTORY << line.strip
   end
 end
 
@@ -35,8 +35,8 @@ def statement_type(statement)
   end
 end
 
-def process_statement(statement_type, statement)
-  case statement_type
+def process_statement(statement)
+  case statement_type(statement)
   when :select
     dataset = DB[statement]
     table = Terminal::Table.new(:headings => dataset.columns) do |t|
@@ -64,13 +64,18 @@ File.open("#{ENV['HOME']}/.dbsh_history", 'a') do |history|
       statement_type = statement_type(line)
       if statement_type == :command
         case line
-          when /\\q/ then exit(0)
-          else puts 'Unknown command'
+        when /\\q/
+          exit(0)
+        when /\\\./
+          process_statement(File.read(line.split(/\s+/)[1]))
+        else
+          puts 'Unknown command'
         end
       else
-        process_statement(statement_type, line)
+        process_statement(line)
       end
-    rescue Sequel::DatabaseError => e
+    rescue Exception => e
+      exit(0) if SystemExit === e 
       puts 'Error: ' + e.message
     end
   end
