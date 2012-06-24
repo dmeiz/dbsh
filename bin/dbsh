@@ -11,6 +11,12 @@ require 'yaml'
 config = YAML.load(File.read("#{ENV['HOME']}/.dbsh"))[ARGV[0]]
 DB = Sequel.connect(config)
 
+File.open("#{ENV['HOME']}/.dbsh_history", 'r') do |f|
+  f.each_line do |line|
+    Readline::HISTORY << line
+  end
+end
+
 #Example ~/.dbsh:
 #dbsh_test:
 #  adapter: sqlite
@@ -29,31 +35,34 @@ def statement_type(statement)
   end
 end
 
-while line = Readline.readline('> ', true)
-  begin
-    case statement_type(line)
-    when :select
-        dataset = DB[line]
-        table = Terminal::Table.new(:headings => dataset.columns) do |t|
-          dataset.each do |row|
-            t.add_row(dataset.columns.map {|col| row[col]})
+File.open("#{ENV['HOME']}/.dbsh_history", 'a') do |history|
+  while line = Readline.readline('> ', true)
+    history.write(line + "\n"); history.flush
+    begin
+      case statement_type(line)
+      when :select
+          dataset = DB[line]
+          table = Terminal::Table.new(:headings => dataset.columns) do |t|
+            dataset.each do |row|
+              t.add_row(dataset.columns.map {|col| row[col]})
+            end
           end
-        end
-      puts table
-    when :insert
-      DB[line].insert
-      puts 'Inserted row'
-    when :update
-      puts "Updated #{DB[line].update} rows"
-    when :delete
-      puts "Deleted #{DB[line].delete} rows"
-    when :command
-      exit(0) if line =~ /\\q/
-    else
-      puts 'Unknown statement type'
+        puts table
+      when :insert
+        DB[line].insert
+        puts 'Inserted row'
+      when :update
+        puts "Updated #{DB[line].update} rows"
+      when :delete
+        puts "Deleted #{DB[line].delete} rows"
+      when :command
+        exit(0) if line =~ /\\q/
+      else
+        puts 'Unknown statement type'
+      end
+    rescue Sequel::DatabaseError => e
+      puts 'Error: ' + e.message
     end
-  rescue Sequel::DatabaseError => e
-    puts 'Error: ' + e.message
   end
 end
 
@@ -113,14 +122,14 @@ X
 X    > foo;
 X    ERROR: What is foo?
 
-  Install:
-
-    $ gem install dbsh
+X  Install:
+X
+X    $ gem install dbsh
 
   Readline support:
 
     * History
-    * Edit line
+X    * Edit line
 
   Execute a sql script:
 
