@@ -68,6 +68,17 @@ File.open("#{ENV['HOME']}/.dbsh_history", 'a') do |history|
           exit(0)
         when /\\\./
           process_statement(File.read(line.split(/\s+/)[1]))
+        when /\\d(\s+\w+)?/
+          if $1
+            table = Terminal::Table.new(:headings => ['Name', 'Type']) do |t|
+              DB.schema($1.strip).each do |col|
+                t.add_row [col.first.to_s, col.last[:db_type]]
+              end
+            end
+            puts table
+          else
+            puts DB.tables.join("\n")
+          end
         else
           puts 'Unknown command'
         end
@@ -94,6 +105,7 @@ X   * Connect to multiple database types
 
   Beyond MVP:
 
+    * Export csv
     * Color output
     * Parameterized sql scripts
     * Column filtering
@@ -146,32 +158,36 @@ X
 X    * History
 X    * Edit line
 
-  Execute a sql script:
+X  Execute a sql script:
+X
+X    > \. illustrations.sql
+X    ...
 
-    > \. illustrations.sql
-    ...
-
-  Execute a sql script from the command line:
-
-    $ dbsh rockwell_dev < illustrations.sql
-    ...
-
-  Explore the database:
-
-    > show tables;
-    name
-    -------------
-    illustrations
-    builds
-
-    > desc illustrations;
-    name       type
-    ---------- ------------ 
-    id         integer
-    name       varchar(256)
-    updated_at datetime
+X  Explore the database:
+X
+X    > show tables;
+X    name
+X    -------------
+X    illustrations
+X    builds
+X
+X    > desc illustrations;
+X    name       type
+X    ---------- ------------ 
+X    id         integer
+X    name       varchar(256)
+X    updated_at datetime
 
   Edit and run a sql script:
 
     > \e illustrations.sql
     (open script in $EDITOR, execute script if changes were made)
+
+  Semicolons
+
+    > select 1; select 2
+
+  Execute a sql script from the command line:
+
+    $ dbsh rockwell_dev < illustrations.sql
+    ...
