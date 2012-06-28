@@ -74,6 +74,13 @@ def process_command(command)
     else
       puts DB.tables.join("\n")
     end
+  when /\\e\s+(.+)?/
+    if $1
+      system(ENV['EDITOR'], $1)
+      process_statement(File.read $1)
+    else
+      puts DB.tables.join("\n")
+    end
   else
     puts 'Unknown command'
   end
@@ -170,10 +177,10 @@ X    id         integer
 X    name       varchar(256)
 X    updated_at datetime
 
-  Edit and run a sql script:
-
-    > \e illustrations.sql
-    (open script in $EDITOR, execute script if changes were made)
+X  Edit and run a sql script:
+X
+X    > \e illustrations.sql
+X    (open script in $EDITOR, execute script if changes were made)
 
   Semicolons
 
