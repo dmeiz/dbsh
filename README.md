@@ -6,6 +6,13 @@ A database console like psql. This is a proof of concept; use at your own risk.
 
     $ gem install dbsh
 
+You'll need to install the right database gem to get connected. For example:
+
+    $ gem install mysql2
+
+Dbsh uses [Sequel](http://sequel.rubyforge.org/), so you should be able to
+connect to anything Sequel can.
+
 ## Usage
 
 Define a connection in `~/.dbsh`:
@@ -24,12 +31,6 @@ Then run `dbsh` with your connection:
 And ask dbsh for help:
 
     > \h
-
-Dbsh uses [Sequel](http://sequel.rubyforge.org/) for database access, so you
-should be able to connect to anything Sequel can. You'll probably need to
-install [the right database
-gem](http://sequel.rubyforge.org/rdoc/files/doc/opening_databases_rdoc.html) to
-get connected.
 
 ## Contributing
 
