@@ -24,6 +24,15 @@ end
 # 
 ## :adapter=>'postgres', :host=>'localhost', :database=>'blog', :user=>'user', :password=>'password'
 
+HELP = <<END
+\\h             Show this help
+\\d             Show tables
+\\d table_name  Show table columns
+\\. file_name   Execute a sql file
+\\e file_name   Edit file and then execute it
+\\q             Quit
+END
+
 def statement_type(statement)
   case statement
     when /\s*select/i then :select
@@ -81,6 +90,8 @@ def process_command(command)
     else
       puts DB.tables.join("\n")
     end
+  when /\\h/
+    puts HELP
   else
     puts 'Unknown command'
   end
