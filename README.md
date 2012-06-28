@@ -1,24 +1,35 @@
 # Dbsh
 
-TODO: Write a gem description
+A database console like psql. This is a proof of concept; use at your own risk.
 
 ## Installation
-
-Add this line to your application's Gemfile:
-
-    gem 'dbsh'
-
-And then execute:
-
-    $ bundle
-
-Or install it yourself as:
 
     $ gem install dbsh
 
 ## Usage
 
-TODO: Write usage instructions here
+Define a connection in `~/.dbsh`:
+
+    mydb:
+      adapter: mysql
+      host: localhost
+      username: root
+      password: password
+      database: mydb
+
+Then run `dbsh` with your connection:
+
+    $ dbsh mydb
+
+And ask dbsh for help:
+
+    > \h
+
+Dbsh uses [Sequel](http://sequel.rubyforge.org/) for database access, so you
+should be able to connect to anything Sequel can. You'll probably need to
+install [the right database
+gem](http://sequel.rubyforge.org/rdoc/files/doc/opening_databases_rdoc.html) to
+get connected.
 
 ## Contributing
 
