@@ -57,31 +57,35 @@ def process_statement(statement)
   end
 end
 
+def process_command(command)
+  case command
+  when /\\q/
+    exit(0)
+  when /\\\./
+    process_statement(File.read(command.split(/\s+/)[1]))
+  when /\\d(\s+\w+)?/
+    if $1
+      table = Terminal::Table.new(:headings => ['Name', 'Type']) do |t|
+        DB.schema($1.strip).each do |col|
+          t.add_row [col.first.to_s, col.last[:db_type]]
+        end
+      end
+      puts table
+    else
+      puts DB.tables.join("\n")
+    end
+  else
+    puts 'Unknown command'
+  end
+end
+
 File.open("#{ENV['HOME']}/.dbsh_history", 'a') do |history|
   while line = Readline.readline('> ', true)
     history.write(line + "\n"); history.flush
     begin
       statement_type = statement_type(line)
       if statement_type == :command
-        case line
-        when /\\q/
-          exit(0)
-        when /\\\./
-          process_statement(File.read(line.split(/\s+/)[1]))
-        when /\\d(\s+\w+)?/
-          if $1
-            table = Terminal::Table.new(:headings => ['Name', 'Type']) do |t|
-              DB.schema($1.strip).each do |col|
-                t.add_row [col.first.to_s, col.last[:db_type]]
-              end
-            end
-            puts table
-          else
-            puts DB.tables.join("\n")
-          end
-        else
-          puts 'Unknown command'
-        end
+        process_command(line)
       else
         process_statement(line)
       end
@@ -97,18 +101,6 @@ __END__
 OVERVIEW
 
   A clone of mysql cli with these enhancements:
-
-X   * Connect to multiple database types
-    * Named connections
-    * Improved editor-execute loop
-    * Implemented in Ruby
-
-  Beyond MVP:
-
-    * Export csv
-    * Color output
-    * Parameterized sql scripts
-    * Column filtering
 
 MVP
 
@@ -191,3 +183,10 @@ X    updated_at datetime
 
     $ dbsh rockwell_dev < illustrations.sql
     ...
+
+Beyond MVP:
+
+  * Export csv
+  * Color output
+  * Parameterized sql scripts
+  * Column filtering
